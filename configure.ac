@@ -10,7 +10,7 @@ AC_INIT([jzmq],[2.1.0],[zeromq-dev@lists.zeromq.org])
 
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR(config)
-AM_CONFIG_HEADER(src/config.hpp)
+AC_CONFIG_HEADERS(src/config.hpp)
 AM_INIT_AUTOMAKE(tar-ustar)
 
 #
@@ -34,6 +34,9 @@ AC_LANG(C++)
 
 # Set default CPPFLAGS for reentrant code
 CPPFLAGS="-D_REENTRANT -D_THREAD_SAFE $CPPFLAGS"
+
+# Attempt to setup JAVA_HOME
+if test -z "$JAVA_HOME" -a -x /usr/libexec/java_home ; then JAVA_HOME=`/usr/libexec/java_home` ; fi
 
 # Check for zeromq library
 zeromq_prefix=detect
@@ -105,7 +108,10 @@ case "${host_os}" in
         CPPFLAGS="$CPPFLAGS -I${JAVA_HOME}/include/linux"
     ;;
     *darwin*)
-        # Darwin does not need an extra -I path
+        #darwin needs an extra include under java 7
+        if test -d ${JAVA_HOME}/include/darwin ;
+           then CPPFLAGS="$CPPFLAGS -I${JAVA_HOME}/include/darwin" ; 
+        fi
     ;;
     *)
         AC_MSG_ERROR([don't know how to find jni_md.h on this platform])
